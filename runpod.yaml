@@ -1,0 +1,86 @@
+name: ai-receptionist
+image: TheRoboMaster123/ai-receptionist:latest
+gpuTypeId: "NVIDIA RTX A5000"
+containerDiskInGb: 50
+volumeInGb: 100
+ports:
+  - 8000
+  - 8001
+  - 8002
+env:
+  - name: HUGGING_FACE_TOKEN
+    value: ${HUGGING_FACE_TOKEN}
+  - name: TWILIO_ACCOUNT_SID
+    value: ${TWILIO_ACCOUNT_SID}
+  - name: TWILIO_AUTH_TOKEN
+    value: ${TWILIO_AUTH_TOKEN}
+  - name: TWILIO_PHONE_NUMBER
+    value: ${TWILIO_PHONE_NUMBER}
+  - name: MODEL_ID
+    value: "mistralai/Mistral-7B-Instruct-v0.2"
+  - name: USE_4BIT
+    value: "true"
+  - name: USE_8BIT
+    value: "false"
+  - name: DEVICE_MAP
+    value: "auto"
+  - name: MAX_MEMORY
+    value: "{0: '24GB'}"
+  - name: CACHE_DIR
+    value: "/app/models/mistral"
+  - name: DATABASE_URL
+    value: "sqlite:///app/data/receptionist.db"
+  - name: SECRET_KEY
+    value: ${SECRET_KEY}
+  - name: JWT_SECRET
+    value: ${JWT_SECRET}
+  - name: JWT_ALGORITHM
+    value: "HS256"
+  - name: JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+    value: "30"
+  - name: RATE_LIMIT_REQUESTS
+    value: "100"
+  - name: RATE_LIMIT_PERIOD
+    value: "60"
+  - name: MAX_CONCURRENT_CALLS
+    value: "10"
+  - name: CALL_TIMEOUT_SECONDS
+    value: "300"
+  - name: CONVERSATION_TIMEOUT_MINUTES
+    value: "30"
+  - name: CLEANUP_INTERVAL_MINUTES
+    value: "5"
+  - name: MAX_MEMORY_USAGE_PERCENT
+    value: "90"
+  - name: MAX_GPU_MEMORY_PERCENT
+    value: "90"
+  - name: LOG_LEVEL
+    value: "INFO"
+  - name: ENABLE_METRICS
+    value: "true"
+  - name: METRICS_PORT
+    value: "9090"
+  - name: ENABLE_TRACING
+    value: "true"
+  - name: TRACING_PORT
+    value: "9091"
+  - name: ENABLE_PROFILING
+    value: "true"
+  - name: PROFILING_PORT
+    value: "9092"
+  - name: ENABLE_HEALTH_CHECKS
+    value: "true"
+  - name: HEALTH_CHECK_INTERVAL
+    value: "30"
+  - name: ENABLE_AUTO_SCALING
+    value: "true"
+  - name: MIN_INSTANCES
+    value: "1"
+  - name: MAX_INSTANCES
+    value: "3"
+  - name: SCALE_UP_THRESHOLD
+    value: "80"
+  - name: SCALE_DOWN_THRESHOLD
+    value: "20"
+  - name: COOLDOWN_PERIOD
+    value: "300" 
