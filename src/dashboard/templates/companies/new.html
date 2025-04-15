@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">New Company</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="greeting_message" class="form-label">Greeting Message</label>
+                        <textarea class="form-control" id="greeting_message" name="greeting_message" rows="3"></textarea>
+                        <div class="form-text">This message will be used to greet callers.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                        <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" placeholder="Phone number or email">
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('list_companies') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Company</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

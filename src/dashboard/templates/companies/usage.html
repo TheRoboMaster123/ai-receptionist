@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">Usage Statistics: {{ company.name }}</h2>
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" onclick="filterPeriod('week')">Week</button>
+                    <button class="btn btn-outline-secondary" onclick="filterPeriod('month')">Month</button>
+                    <button class="btn btn-outline-secondary" onclick="filterPeriod('year')">Year</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Calls</h5>
+                                <h2 class="card-text">{{ usage|sum(attribute='calls_handled') }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Duration</h5>
+                                <h2 class="card-text">{{ '%0.2f'|format(usage|sum(attribute='total_duration') / 60) }} min</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">GPU Usage</h5>
+                                <h2 class="card-text">{{ '%0.2f'|format(usage|sum(attribute='gpu_minutes')) }} min</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h5>Daily Usage</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Calls</th>
+                                        <th>Duration</th>
+                                        <th>GPU Usage</th>
+                                        <th>Avg. Call Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for day in usage %}
+                                    <tr>
+                                        <td>{{ day.date.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ day.calls_handled }}</td>
+                                        <td>{{ '%0.2f'|format(day.total_duration / 60) }} min</td>
+                                        <td>{{ '%0.2f'|format(day.gpu_minutes) }} min</td>
+                                        <td>{{ '%0.1f'|format(day.total_duration / day.calls_handled if day.calls_handled else 0) }} sec</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h5>Usage Trends</h5>
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let chart;
+const companyId = {{ company.id }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initChart({{ usage|map(attribute='date.strftime')|list|tojson }},
+              {{ usage|map(attribute='calls_handled')|list|tojson }},
+              {{ usage|map(attribute='total_duration')|list|tojson }});
+    
+    // Set active period button
+    const defaultPeriod = 'month';
+    document.querySelector(`button[onclick="filterPeriod('${defaultPeriod}')"]`).classList.add('active');
+});
+
+function initChart(dates, calls, durations) {
+    const ctx = document.getElementById('usageChart').getContext('2d');
+    
+    if (chart) {
+        chart.destroy();
+    }
+    
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Calls',
+                data: calls,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }, {
+                label: 'Duration (min)',
+                data: durations.map(d => d / 60),
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+async function filterPeriod(period) {
+    // Update active button state
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`button[onclick="filterPeriod('${period}')"]`).classList.add('active');
+    
+    try {
+        const response = await fetch(`/api/companies/${companyId}/usage?period=${period}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch usage data');
+        }
+        
+        const data = await response.json();
+        
+        // Update summary cards
+        document.querySelector('.card-text:contains("Total Calls")').textContent = data.summary.total_calls;
+        document.querySelector('.card-text:contains("Total Duration")').textContent = 
+            `${(data.summary.total_duration / 60).toFixed(2)} min`;
+        document.querySelector('.card-text:contains("GPU Usage")').textContent = 
+            `${data.summary.gpu_minutes.toFixed(2)} min`;
+            
+        // Update table
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = data.daily.map(day => `
+            <tr>
+                <td>${day.date}</td>
+                <td>${day.calls_handled}</td>
+                <td>${(day.total_duration / 60).toFixed(2)} min</td>
+                <td>${day.gpu_minutes.toFixed(2)} min</td>
+                <td>${(day.calls_handled ? (day.total_duration / day.calls_handled).toFixed(1) : 0)} sec</td>
+            </tr>
+        `).join('');
+        
+        // Update chart
+        initChart(
+            data.daily.map(d => d.date),
+            data.daily.map(d => d.calls_handled),
+            data.daily.map(d => d.total_duration)
+        );
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to fetch usage data. Please try again.');
+    }
+}
+</script>
+{% endblock %} 

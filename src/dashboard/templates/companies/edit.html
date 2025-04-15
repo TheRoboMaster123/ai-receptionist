@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Edit Company: {{ company.name }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ company.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="greeting_message" class="form-label">Greeting Message</label>
+                        <textarea class="form-control" id="greeting_message" name="greeting_message" rows="3">{{ company.greeting_message or '' }}</textarea>
+                        <div class="form-text">This message will be used to greet callers.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                        <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" value="{{ company.emergency_contact or '' }}" placeholder="Phone number or email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Business Hours</label>
+                        <div class="card">
+                            <div class="card-body">
+                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                <div class="row mb-2">
+                                    <div class="col-md-3">
+                                        <label class="form-check-label">
+                                            <input type="checkbox" class="form-check-input" name="business_days" value="{{ day }}"
+                                                {{ 'checked' if company.business_hours and day in company.business_hours }}>
+                                            {{ day }}
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="time" class="form-control" name="{{ day }}_start"
+                                            value="{{ company.business_hours[day]['start'] if company.business_hours and day in company.business_hours else '09:00' }}">
+                                    </div>
+                                    <div class="col-md-1 text-center">to</div>
+                                    <div class="col-md-4">
+                                        <input type="time" class="form-control" name="{{ day }}_end"
+                                            value="{{ company.business_hours[day]['end'] if company.business_hours and day in company.business_hours else '17:00' }}">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="active" name="active" {{ 'checked' if company.active }}>
+                            <label class="form-check-label" for="active">Active</label>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('view_company', id=company.id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.querySelectorAll('input[name="business_days"]').forEach(checkbox => {
+    const row = checkbox.closest('.row');
+    const timeInputs = row.querySelectorAll('input[type="time"]');
+    
+    function updateTimeInputs() {
+        timeInputs.forEach(input => {
+            input.disabled = !checkbox.checked;
+        });
+    }
+    
+    checkbox.addEventListener('change', updateTimeInputs);
+    updateTimeInputs();
+});
+</script>
+{% endblock %}
+
+{% endblock %} 

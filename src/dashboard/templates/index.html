@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h1>AI Receptionist Dashboard</h1>
+        <p class="lead">Manage your AI receptionist system, companies, and resources.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Companies</h5>
+                <p class="card-text">Manage your companies and their configurations.</p>
+                <a href="{{ url_for('list_companies') }}" class="btn btn-primary">View Companies</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Voice Profiles</h5>
+                <p class="card-text">Configure and manage voice settings for each company.</p>
+                <a href="{{ url_for('list_companies') }}" class="btn btn-primary">Manage Voices</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resource Usage</h5>
+                <p class="card-text">Monitor system resources and company usage.</p>
+                <a href="#" class="btn btn-primary">View Usage</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

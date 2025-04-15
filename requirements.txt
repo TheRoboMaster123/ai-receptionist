@@ -1,0 +1,53 @@
+# Core dependencies
+fastapi==0.109.0
+uvicorn==0.27.0
+python-dotenv==1.0.0
+pydantic==2.5.3
+
+# Machine Learning
+torch==2.2.0
+torchaudio==2.2.0
+transformers==4.37.2
+TTS==0.21.1
+bitsandbytes==0.41.3
+accelerate==0.26.1
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+
+# API Integration
+twilio==8.12.0
+requests==2.31.0
+
+# Security
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
+python-multipart==0.0.6
+
+# Utilities
+numpy==1.26.3
+pandas==2.1.4
+python-dateutil==2.8.2
+pytz==2023.3
+
+# LangChain and LLM
+langchain==0.1.12
+langchain-community==0.0.27
+langchain-core==0.1.30
+scipy==1.15.2
+soundfile==0.12.1
+librosa>=0.10.0
+sentence-transformers==2.5.1
+
+# Database and Storage
+chromadb==0.4.24
+
+# Flask and its dependencies
+flask==3.0.0
+flask-sqlalchemy==3.1.1
+werkzeug==3.0.1
+jinja2==3.1.2
+click==8.1.7
+itsdangerous==2.1.2 
