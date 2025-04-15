@@ -31,6 +31,19 @@ TTS_WS_URL = "ws://localhost:8001/ws/tts"
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+TWILIO_WEBHOOK_URL = os.getenv('TWILIO_WEBHOOK_URL')
+
+# Validate webhook URL configuration
+if not TWILIO_WEBHOOK_URL:
+    logger.error("TWILIO_WEBHOOK_URL environment variable is not set")
+    raise ValueError("TWILIO_WEBHOOK_URL environment variable is required")
+
+# Ensure webhook URL is properly formatted
+if not TWILIO_WEBHOOK_URL.startswith(('http://', 'https://')):
+    logger.error(f"Invalid webhook URL format: {TWILIO_WEBHOOK_URL}")
+    raise ValueError("Webhook URL must start with http:// or https://")
+
+logger.info(f"Using webhook URL: {TWILIO_WEBHOOK_URL}")
 
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
@@ -145,6 +158,13 @@ async def handle_incoming_call(request: Request):
     else:
         response.say("I apologize, but I'm having trouble initializing the conversation.")
     
+    # Add the webhook for handling the call
+    response.dial().client(
+        "ai_receptionist",
+        status_callback=TWILIO_WEBHOOK_URL,
+        status_callback_event=['initiated', 'ringing', 'answered', 'completed']
+    )
+    
     return str(response)
 
 @app.post("/handle_speech")
@@ -196,6 +216,19 @@ async def handle_call_status(request: Request):
         del active_calls[call_sid]
         
     return {"status": "success"}
+
+def update_webhook_url(new_url):
+    """Update the webhook URL in Twilio"""
+    # Update the webhook URL for your Twilio phone number
+    incoming_phone_number = twilio_client.incoming_phone_numbers(TWILIO_PHONE_NUMBER).fetch()
+    incoming_phone_number.update(
+        voice_url=new_url,
+        voice_method='POST'
+    )
+    
+    # Also update the environment variable
+    os.environ['TWILIO_WEBHOOK_URL'] = new_url
+    return True
 
 if __name__ == "__main__":
     import uvicorn

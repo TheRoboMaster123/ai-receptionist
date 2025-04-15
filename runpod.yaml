@@ -8,6 +8,10 @@ ports:
   - 8001
   - 8002
 env:
+  - name: RUNPOD_URL
+    value: https://${RUNPOD_POD_ID}-${RUNPOD_GPU_ID}.proxy.runpod.net
+  - name: TWILIO_WEBHOOK_URL
+    value: ${RUNPOD_URL}/webhook
   - name: HUGGING_FACE_TOKEN
     value: ${HUGGING_FACE_TOKEN}
   - name: TWILIO_ACCOUNT_SID

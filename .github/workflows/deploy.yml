@@ -43,4 +43,12 @@ jobs:
         with:
           api-key: ${{ secrets.RUNPOD_API_KEY }}
           template: runpod.yaml
-          wait-for-deployment: true 
+          wait-for-deployment: true
+          env:
+            RUNPOD_URL: ${{ secrets.RUNPOD_URL }}
+            HUGGING_FACE_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
+            TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+            TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+            TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            JWT_SECRET: ${{ secrets.JWT_SECRET }} 
